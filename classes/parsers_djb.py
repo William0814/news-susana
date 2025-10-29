@@ -12,7 +12,7 @@ ROOT = os.getenv("ROOT_URL")
 HEADERS = {"User-Agent": "SusanaNewsBot/1.0 (nachrichten.pena-abogados.com)"}
 
 class DJBUnified:
-    def __init__(self, base_url=BASE, max_items=10, follow_detail=True, delay=0.8):
+    def __init__(self, base_url=BASE, max_items=30, follow_detail=True, delay=0.8):
         self.base_url = base_url
         self.max_items = max_items     # cuántos ítems del listado procesar
         self.follow_detail = follow_detail  # entrar al detalle para fecha/resumen
@@ -52,10 +52,24 @@ class DJBUnified:
             prev_el = card.select_one(".news-content-preview")
             resume = self._normalize_space(prev_el.get_text()) if prev_el else None
 
+            date_txt = None
+            time_el = card.find('time', itemprop="datePublished")
+            if time_el:
+                date_txt = time_el.get("datetime") or time_el.get_text(" ", strip=True)
+
+            else:
+                span_el = card.select_one(".news-content-date, .article-date, .date")
+                if span_el:
+                    raw = span_el.get_text(" ", strip=True)
+                    date_txt = raw.split(" - ", 1)[0].strip()
+
+            date_txt = self._normalize_space(date_txt)
+
+
             items.append({
                 "title": title,
                 "url": href,
-                "date": None,
+                "date": date_txt,
                 "resume": resume,
                 "source": "djb.de/familienrecht",
                 "quelle": BASE
@@ -76,11 +90,11 @@ class DJBUnified:
         result = {}
 
         # Fecha: <time>, .news-content-date, meta
-        t = soup.find("time")
+        t = soup.find('time', itemprop="datePublished")
         if t and t.get_text(strip=True):
             result["date"] = self._normalize_space(t.get_text(strip=True))
         else:
-            el = soup.select_one(".news-content-date, .article-date, .date")
+            el = soup.select_one("time", itemprop="datePublished")
             if el:
                 result["date"] = self._normalize_space(el.get_text())
 
@@ -110,19 +124,19 @@ class DJBUnified:
                 continue
 
             # Enriquecer desde el detalle (con delay educado)
-            for it in items:
+            for item in items:
                 time.sleep(self.delay)
-                info = self._enrich_from_detail(it["url"])
-                it.update(info)
-                all_items.append(it)
+                info = self._enrich_from_detail(item["url"])
+                item.update(info)
+                all_items.append(item)
 
         # Deduplicar por URL
         seen, uniq = set(), []
-        for it in all_items:
-            if it["url"] in seen:
+        for item in all_items:
+            if item["url"] in seen:
                 continue
-            seen.add(it["url"])
-            uniq.append(it)
+            seen.add(item["url"])
+            uniq.append(item)
 
         return uniq
     

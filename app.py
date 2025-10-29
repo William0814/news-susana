@@ -3,7 +3,6 @@ import os
 from dotenv import load_dotenv
 from classes.parsers_djb import DJBUnified
 from classes.persistence import DataNewsScraping
-from itertools import zip_longest
 
 
 load_dotenv()
@@ -11,12 +10,12 @@ load_dotenv()
 app = Flask(__name__)
 
 store = DataNewsScraping()
-CRON_SECRET = os.getenv("CRON_SECRET")
+CRON_SECRET = os.getenv("CRON_SECRET") or "dev-secret"
 
 
 @app.route('/')
 def home_news():
-    items = store.latest(limit=12)
+    items = store.latest(limit=20)
     return render_template('index.html', items=items, page_title="Aktuelle Nachrichten")
 
 @app.route('/suchen')
@@ -34,9 +33,9 @@ def search():
 
     return render_template('index.html', items=items, page_title= f"Suchergebnisse für {query}" if query else "Suchen")
 
-@app.route('/cron/scrape/<secret>')
-def cron_scrape(secret):
-    if secret != CRON_SECRET:
+@app.route('/cron/scrape')
+def cron_scrape():
+    if request.args.get("secret") != CRON_SECRET:
         return "Unauthorized", 401
     
     scraper = DJBUnified(max_items=30, follow_detail=False)
