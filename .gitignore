@@ -1,0 +1,16 @@
+/venv/
+__pycache__
+.env
+.vscode/
+migrations/
+.DS_store
+Thumbs.db
+.log
+*.py[cod]
+*$py.class
+instance/
+*.sqlite3
+*.db
+*.egg-info/
+env/
+
