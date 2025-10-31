@@ -15,7 +15,7 @@ CRON_SECRET = os.getenv("CRON_SECRET") or "dev-secret"
 
 @app.route('/')
 def home_news():
-    items = store.latest(limit=20)
+    items = store.latest(limit=30)
     return render_template('index.html', items=items, page_title="Aktuelle Nachrichten")
 
 @app.route('/suchen')
@@ -37,7 +37,7 @@ def search():
 def cron_scrape():
     if request.args.get("secret") != CRON_SECRET:
         return "Unauthorized", 401
-    
+
     scraper = DJBUnified(max_items=30, follow_detail=False)
     items = scraper.fetch_items()
     inserted = store.save_items(items)

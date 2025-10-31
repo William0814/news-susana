@@ -71,8 +71,7 @@ class DJBUnified:
                 "url": href,
                 "date": date_txt,
                 "resume": resume,
-                "source": "djb.de/familienrecht",
-                "quelle": BASE
+                "source": "djb.de/familienrecht"
             })
             if len(items) >= self.max_items:
                 break

@@ -141,8 +141,9 @@
 						class="more" target="_blank"><b>mehr&nbsp;<i class="fal fa-chevron-right"></i></b></a></p>
 				{% endif %}
 
-				<span class="fh5co-meta"><a href="{{ item.quelle }}" target="_blank" title="Quelle oder Autor..">
-						<b>{{ item.source or 'fuente' }}</b></a></span>
+				<span class="fh5co-meta"><a href="https://www.djb.de/familienrecht" target="_blank"
+						title="Quelle oder Autor..">
+						<b>{{ item.source or 'Autor not found' }}</b></a></span>
 
 				{% if item.publishedat %}
 				<span class="fh5co-meta fh5co-date">{{ item.publishedat or 'date not found' }}</span>
