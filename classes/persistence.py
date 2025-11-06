@@ -53,7 +53,7 @@ class DataNewsScraping:
         query = text("""
         SELECT title, url, source, resume, publishedat
         FROM news_items
-        ORDER BY createdat DESC NULLS FIRST
+        ORDER BY id ASC NULLS LAST
         LIMIT :n
         """)
         with self.engine.begin() as c:
