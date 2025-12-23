@@ -15,7 +15,7 @@ CRON_SECRET = os.getenv("CRON_SECRET") or "dev-secret"
 
 @app.route('/')
 def home_news():
-    items = store.latest(limit=40)
+    items = store.latest(limit=30)
     return render_template('index.html', items=items, page_title="Aktuelle Nachrichten")
 
 @app.route('/suchen')

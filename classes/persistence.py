@@ -28,11 +28,7 @@ class DataNewsScraping:
         with self.engine.begin() as c:
             c.exec_driver_sql(command_create)
 
-    def save_items(self, items: Iterable[Dict[str, Any]]) -> int:
-        sql = text("""
-        INSERT INTO news_items (title, url, source, resume, publishedat, createdat)
-        VALUES (:title, :url, :source, :resume, :publishedat, now())
-        """)
+    def save_items(self, items: Iterable[Dict[str, Any]], keep: int = 30) -> int:
 
         payLoads = []
         for item in items:
@@ -45,11 +41,25 @@ class DataNewsScraping:
             })
         if not payLoads:
             return 0
+        sql = text("""
+        INSERT INTO news_items (title, url, source, resume, publishedat, createdat)
+        VALUES (:title, :url, :source, :resume, :publishedat, now())
+        """)
+        
+        clean_sql = text("""
+        DELETE FROM news_items
+        WHERE id NOT IN (
+            SELECT id FROM news_items
+            ORDER BY createdat DESC
+            LIMIT :keep
+        )
+        """)
         with self.engine.begin() as c:
             result = c.execute(sql, payLoads)
+            c.execute(clean_sql, {"keep": keep})
             return result.rowcount or 0
         
-    def latest(self, limit: int = 31) -> List[Dict[str, Any]]:
+    def latest(self, limit: int = 30) -> List[Dict[str, Any]]:
         query = text("""
         SELECT title, url, source, resume, publishedat
         FROM news_items
@@ -59,6 +69,11 @@ class DataNewsScraping:
         with self.engine.begin() as c:
             rows = c.execute(query, {"n": limit}).mappings().all()
         return [dict(row) for row in rows]
+            
+
+        with self.engine.begin() as c:
+            result = c.execute(query, {"keep": keep})
+            return result.rowcount or 0
 
     
 
