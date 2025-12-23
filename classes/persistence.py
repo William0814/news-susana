@@ -49,11 +49,11 @@ class DataNewsScraping:
             result = c.execute(sql, payLoads)
             return result.rowcount or 0
         
-    def latest(self, limit: int = 30) -> List[Dict[str, Any]]:
+    def latest(self, limit: int = 31) -> List[Dict[str, Any]]:
         query = text("""
         SELECT title, url, source, resume, publishedat
         FROM news_items
-        ORDER BY id ASC NULLS LAST
+        ORDER BY createdat DESC NULLS LAST
         LIMIT :n
         """)
         with self.engine.begin() as c:
